@@ -97,3 +97,40 @@ timestamp,temperature,pressure,humidity,gas_resistance
 ~/.virtualenvs/pimoroni/bin/python main.py
 ```
 
+## Running on port 80
+
+By default the service binds to port **8080**. To use the standard HTTP port 80 without running as root, two approaches are recommended:
+
+### Option A – authbind
+
+```bash
+sudo apt-get install authbind
+sudo touch /etc/authbind/byport/80
+sudo chmod 500 /etc/authbind/byport/80
+sudo chown pi /etc/authbind/byport/80
+```
+
+Update `bme680-logger.service` to use authbind:
+
+```ini
+ExecStart=authbind --deep /home/pi/.virtualenvs/pimoroni/bin/python main.py
+```
+
+And set `port = 80` in `config.ini`.
+
+### Option B – systemd socket capabilities
+
+Add `AmbientCapabilities` to the `[Service]` section of `bme680-logger.service`:
+
+```ini
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+```
+
+Then set `port = 80` in `config.ini` and reload:
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl restart bme680-logger
+```
+
+

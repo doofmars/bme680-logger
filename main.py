@@ -86,6 +86,20 @@ except Exception as _e:
     DISPLAY_OK = False
     log.warning("OLED display not available: %s", _e)
 
+# Font for OLED – prefer a readable TrueType font, fall back to PIL default
+_OLED_FONT = None
+try:
+    from PIL import ImageFont as _ImageFont
+
+    try:
+        _OLED_FONT = _ImageFont.truetype(
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 12
+        )
+    except Exception:
+        _OLED_FONT = _ImageFont.load_default()
+except ImportError:
+    pass
+
 # ---------------------------------------------------------------------------
 # Shared state
 # ---------------------------------------------------------------------------
@@ -157,13 +171,14 @@ def _refresh_display(data: dict) -> None:
             _display.hide()
             return
         _display.show()
+        font = _OLED_FONT  # may be None if PIL unavailable
         with _luma_canvas(_display) as draw:
-            draw.text((0, 0),  f"Temp:  {data['temperature']:.1f} \u00b0C", fill="white")
-            draw.text((0, 16), f"Hum:   {data['humidity']:.1f} %",          fill="white")
-            draw.text((0, 32), f"Press: {data['pressure']:.1f} hPa",        fill="white")
+            draw.text((0, 0),  f"Temp:  {data['temperature']:.1f} \u00b0C", fill="white", font=font)
+            draw.text((0, 14), f"Hum:   {data['humidity']:.1f} %",          fill="white", font=font)
+            draw.text((0, 28), f"Press: {data['pressure']:.1f} hPa",        fill="white", font=font)
             gas = data.get("gas_resistance")
             if gas is not None:
-                draw.text((0, 48), f"Gas:   {int(gas)} \u03a9",             fill="white")
+                draw.text((0, 42), f"Gas:   {int(gas)} \u03a9",             fill="white", font=font)
 
 
 # ---------------------------------------------------------------------------
@@ -173,7 +188,25 @@ def _refresh_display(data: dict) -> None:
 
 def _sensor_loop() -> None:
     global _latest
+    # Read immediately on startup; retry every second until data is available
+    while not _latest:
+        try:
+            data = _read_sensor()
+            if data:
+                _latest = data
+                _append_row(data)
+                _refresh_display(data)
+                log.info("Initial read: %s", data)
+            else:
+                log.debug("Waiting for initial sensor data…")
+                time.sleep(1)
+        except Exception as exc:
+            log.error("Startup sensor read error: %s", exc)
+            time.sleep(1)
+
+    # Subsequent reads at the configured interval
     while True:
+        time.sleep(LOG_INTERVAL)
         try:
             data = _read_sensor()
             if data:
@@ -185,7 +218,6 @@ def _sensor_loop() -> None:
                 log.debug("No sensor data available")
         except Exception as exc:
             log.error("Sensor loop error: %s", exc)
-        time.sleep(LOG_INTERVAL)
 
 
 # ---------------------------------------------------------------------------
@@ -243,10 +275,13 @@ def display_post():
     global _display_enabled
     body = request.get_json(force=True, silent=True) or {}
     _display_enabled = bool(body.get("enabled", _display_enabled))
-    # Immediately hide the display if being turned off
     if not _display_enabled and DISPLAY_OK:
+        # Immediately hide the display when turned off
         with _display_lock:
             _display.hide()
+    elif _display_enabled and DISPLAY_OK and _latest:
+        # Immediately refresh the display when turned on
+        _refresh_display(_latest)
     log.info("Display enabled set to: %s", _display_enabled)
     return jsonify({"enabled": _display_enabled})
 
