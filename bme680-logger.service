@@ -1,0 +1,16 @@
+[Unit]
+Description=BME680 Logger Service
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/bme680-logger
+ExecStart=/home/pi/.virtualenvs/pimoroni/bin/python main.py
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

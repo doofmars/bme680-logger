@@ -1,0 +1,5 @@
+Flask>=2.3
+bme680>=1.0
+luma.oled>=3.11
+luma.core>=2.4
+Pillow>=10.0
