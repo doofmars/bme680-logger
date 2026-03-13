@@ -4,16 +4,16 @@ Log data from an I²C-connected BME680 sensor every 5 minutes, display it on an 
 
 ## Features
 
-| # | Feature |
-|---|---------|
-| F1 | Sensor data logged every 5 minutes to a daily CSV file |
-| F2 | Web interface shows current readings and a 7-day history chart |
-| F3 | Raw CSV download from the web interface |
-| F4 | A new log file is created automatically each day |
-| F5 | Runs as a `systemd` service with automatic restart on failure |
+| #  | Feature                                                                                     |
+|----|---------------------------------------------------------------------------------------------|
+| F1 | Sensor data logged every 5 minutes to a daily CSV file                                      |
+| F2 | Web interface shows current readings and a 7-day history chart                              |
+| F3 | Raw CSV download from the web interface                                                     |
+| F4 | A new log file is created automatically each day                                            |
+| F5 | Runs as a `systemd` service with automatic restart on failure                               |
 | F6 | OLED (I²C, address `0x3C`) shows current temperature, humidity, pressure and gas resistance |
-| F7 | Web interface toggle to turn the OLED on or off |
-| F8 | OLED is only active during configurable daylight hours (default 08:00–22:00) |
+| F7 | Web interface toggle to turn the OLED on or off                                             |
+| F8 | OLED is only active during configurable daylight hours (default 08:00–22:00)                |
 
 ## Hardware
 
@@ -74,13 +74,13 @@ port = 8080
 
 Open `http://<raspberry-pi-ip>:8080` in a browser.
 
-| Path | Description |
-|------|-------------|
-| `/` | Dashboard – current readings, 7-day chart, display toggle |
-| `/download` | Download today's CSV file |
-| `/api/current` | JSON – latest sensor reading |
-| `/api/history?days=7` | JSON – last *N* days of readings |
-| `/api/display` | GET / POST – query or set display state (`{"enabled": true/false}`) |
+| Path                  | Description                                                         |
+|-----------------------|---------------------------------------------------------------------|
+| `/`                   | Dashboard – current readings, 7-day chart, display toggle           |
+| `/download`           | Download today's CSV file                                           |
+| `/api/current`        | JSON – latest sensor reading                                        |
+| `/api/history?days=7` | JSON – last *N* days of readings                                    |
+| `/api/display`        | GET / POST – query or set display state (`{"enabled": true/false}`) |
 
 ## Log file format
 
@@ -99,26 +99,8 @@ timestamp,temperature,pressure,humidity,gas_resistance
 
 ## Running on port 80
 
-By default the service binds to port **8080**. To use the standard HTTP port 80 without running as root, two approaches are recommended:
-
-### Option A – authbind
-
-```bash
-sudo apt-get install authbind
-sudo touch /etc/authbind/byport/80
-sudo chmod 500 /etc/authbind/byport/80
-sudo chown pi /etc/authbind/byport/80
-```
-
-Update `bme680-logger.service` to use authbind:
-
-```ini
-ExecStart=authbind --deep /home/pi/.virtualenvs/pimoroni/bin/python main.py
-```
-
-And set `port = 80` in `config.ini`.
-
-### Option B – systemd socket capabilities
+By default, the service binds to port **8080**. 
+Change the service to use the standard HTTP port 80:
 
 Add `AmbientCapabilities` to the `[Service]` section of `bme680-logger.service`:
 
