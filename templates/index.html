@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BME680 Logger</title>
   <!-- Tailwind CSS (CDN) -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="{{ url_for('static', filename='tailwind.js') }}"></script>
   <!-- Chart.js (CDN) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script src="{{ url_for('static', filename='chart.umd.min.js') }}"></script>
   <style>
     .card { @apply bg-white rounded-2xl shadow p-5; }
     .metric-value { @apply text-4xl font-bold; }
