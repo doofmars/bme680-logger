@@ -2,6 +2,8 @@
 
 Log data from an I²C-connected BME680 sensor every 5 minutes, display it on an OLED screen and serve a simple web interface.
 
+![sample.png](sample.png)
+
 ## Features
 
 | #  | Feature                                                                                     |
