@@ -35,6 +35,8 @@ DAYLIGHT_START = _cfg.getint("display", "daylight_start", fallback=8)
 DAYLIGHT_END = _cfg.getint("display", "daylight_end", fallback=22)
 WEB_HOST = _cfg.get("web", "host", fallback="0.0.0.0")
 WEB_PORT = _cfg.getint("web", "port", fallback=8080)
+FONT_SIZE = 12
+FONT_SPACE = 2
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -93,7 +95,7 @@ try:
 
     try:
         _OLED_FONT = _ImageFont.truetype(
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 12
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", FONT_SIZE
         )
     except Exception:
         _OLED_FONT = _ImageFont.load_default()
@@ -173,12 +175,13 @@ def _refresh_display(data: dict) -> None:
         _display.show()
         font = _OLED_FONT  # may be None if PIL unavailable
         with _luma_canvas(_display) as draw:
-            draw.text((0, 0),  f"Temp:  {data['temperature']:.1f} \u00b0C", fill="white", font=font)
-            draw.text((0, 14), f"Hum:   {data['humidity']:.1f} %",          fill="white", font=font)
-            draw.text((0, 28), f"Press: {data['pressure']:.1f} hPa",        fill="white", font=font)
+            draw.text((0, 0),  f"Temp:  {data['temperature']:.1f} \u00b0C",       fill="white", font=font)
+            line_height = FONT_SIZE + FONT_SPACE
+            draw.text((0, line_height), f"Hum:   {data['humidity']:.1f} %",       fill="white", font=font)
+            draw.text((0, 2 * line_height), f"Press: {data['pressure']:.1f} hPa", fill="white", font=font)
             gas = data.get("gas_resistance")
             if gas is not None:
-                draw.text((0, 42), f"Gas:   {int(gas)} \u03a9",             fill="white", font=font)
+                draw.text((0, 3 * line_height), f"Gas:   {int(gas)} \u03a9",      fill="white", font=font)
 
 
 # ---------------------------------------------------------------------------
