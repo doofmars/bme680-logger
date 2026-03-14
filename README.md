@@ -6,18 +6,18 @@ Log data from an I²C-connected **BME688** sensor every 5 minutes, display it on
 
 ## Features
 
-| #  | Feature                                                                                          |
-|----|--------------------------------------------------------------------------------------------------|
-| F1 | Sensor data logged every 5 minutes to a daily CSV file                                           |
-| F2 | Web interface shows current readings and a 7-day history chart                                   |
-| F3 | Raw CSV download from the web interface                                                           |
-| F4 | A new log file is created automatically each day                                                 |
-| F5 | Runs as a `systemd` service with automatic restart on failure                                    |
-| F6 | OLED (I²C, address `0x3C`) shows current temperature, humidity, pressure and gas resistance     |
-| F7 | Web interface toggle to turn the OLED on or off                                                  |
-| F8 | OLED is only active during configurable daylight hours (default 08:00–22:00)                     |
-| F9 | IAQ (Indoor Air Quality) score calculated from gas resistance and humidity with a burn-in phase  |
-| F10| Configurable OLED display mode: temperature/humidity, IAQ only, or cycling between both per minute |
+| #   | Feature                                                                                            |
+|-----|----------------------------------------------------------------------------------------------------|
+| F1  | Sensor data logged every 5 minutes to a daily CSV file                                             |
+| F2  | Web interface shows current readings and a 7-day history chart                                     |
+| F3  | Raw CSV download from the web interface                                                            |
+| F4  | A new log file is created automatically each day                                                   |
+| F5  | Runs as a `systemd` service with automatic restart on failure                                      |
+| F6  | OLED (I²C, address `0x3C`) shows current temperature, humidity, pressure and gas resistance        |
+| F7  | Web interface toggle to turn the OLED on or off                                                    |
+| F8  | OLED is only active during configurable daylight hours (default 08:00–22:00)                       |
+| F9  | IAQ (Indoor Air Quality) score calculated from gas resistance and humidity with a burn-in phase    |
+| F10 | Configurable OLED display mode: temperature/humidity, IAQ only, or cycling between both per minute |
 
 ## Hardware
 
@@ -29,12 +29,12 @@ Log data from an I²C-connected **BME688** sensor every 5 minutes, display it on
 
 The **BME688** is the successor to the BME680.  Both sensors measure temperature, pressure, humidity and gas resistance, but the BME688 adds:
 
-| Feature | BME680 | BME688 |
-|---------|--------|--------|
-| Gas sensor scanning | Single fixed point | Multiple configurable scan points |
-| AI / pattern recognition | ❌ | ✅ (via Bosch BSEC 2.x library) |
-| Gas sensor resolution | 18-bit | 20-bit |
-| Backward compatibility | – | Pin- and software-compatible with BME680 |
+| Feature                  | BME680             | BME688                                   |
+|--------------------------|--------------------|------------------------------------------|
+| Gas sensor scanning      | Single fixed point | Multiple configurable scan points        |
+| AI / pattern recognition | ❌                  | ✅ (via Bosch BSEC 2.x library)           |
+| Gas sensor resolution    | 18-bit             | 20-bit                                   |
+| Backward compatibility   | –                  | Pin- and software-compatible with BME680 |
 
 This project uses the Pimoroni `bme680` Python library which is **fully compatible with both devices**.  The IAQ score implemented here is a simplified approximation based on gas-resistance baseline and humidity deviation; it does not require the Bosch BSEC library.
 
@@ -96,13 +96,13 @@ port = 8080
 
 Open `http://<raspberry-pi-ip>:8080` in a browser.
 
-| Path                  | Description                                                         |
-|-----------------------|---------------------------------------------------------------------|
-| `/`                   | Dashboard – current readings, 7-day chart, display toggle           |
-| `/download`           | Download today's CSV file                                           |
-| `/api/current`        | JSON – latest sensor reading (includes `iaq` field)                 |
-| `/api/history?days=7` | JSON – last *N* days of readings                                    |
-| `/api/display`        | GET / POST – query or set display state (`{"enabled": true/false}`) |
+| Path                  |   | Description                                                         |
+|-----------------------|:--|---------------------------------------------------------------------|
+| `/`                   |   | Dashboard – current readings, 7-day chart, display toggle           |
+| `/download`           |   | Download today's CSV file                                           |
+| `/api/current`        |   | JSON – latest sensor reading (includes `iaq` field)                 |
+| `/api/history?days=7` |   | JSON – last *N* days of readings                                    |
+| `/api/display`        |   | GET / POST – query or set display state (`{"enabled": true/false}`) |
 
 ## IAQ (Indoor Air Quality)
 
@@ -113,14 +113,14 @@ The IAQ score is computed using a simplified version of the Bosch reference algo
 * **Gas resistance** contributes 75 % of the score (higher resistance = cleaner air).
 * The combined 0–100 score is mapped to the 0–500 AQI-style range (lower is better).
 
-| IAQ range | Category                    |
-|-----------|-----------------------------|
-| 0 – 50    | Good                        |
-| 51 – 100  | Moderate                    |
-| 101 – 150 | Unhealthy (sensitive groups)|
-| 151 – 200 | Unhealthy                   |
-| 201 – 300 | Very unhealthy              |
-| 301 – 500 | Hazardous                   |
+| IAQ range | Category                     |
+|-----------|------------------------------|
+| 0 – 50    | Good                         |
+| 51 – 100  | Moderate                     |
+| 101 – 150 | Unhealthy (sensitive groups) |
+| 151 – 200 | Unhealthy                    |
+| 201 – 300 | Very unhealthy               |
+| 301 – 500 | Hazardous                    |
 
 The `iaq` column in the CSV file will be empty until the burn-in phase completes.
 

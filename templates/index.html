@@ -1,218 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>BME688 Logger</title>
-  <!-- Tailwind CSS (CDN) -->
-  <script src="{{ url_for('static', filename='tailwind.js') }}"></script>
-  <!-- Chart.js (CDN) -->
-  <script src="{{ url_for('static', filename='chart.umd.min.js') }}"></script>
-  <style>
-    .card { @apply bg-white rounded-2xl shadow p-5; }
-    .metric-value { @apply text-4xl font-bold; }
-    .metric-label { @apply text-sm text-gray-500 mt-1; }
-  </style>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>BME688 Logger</title>
+    <!-- Tailwind CSS (CDN) -->
+    <script src="{{ url_for('static', filename='tailwind.js') }}"></script>
+    <!-- Chart.js (CDN) -->
+    <script src="{{ url_for('static', filename='chart.umd.min.js') }}"></script>
+    <style>
+        .card {
+            @apply bg-white rounded-2xl shadow p-5;
+        }
+
+        .metric-value {
+            @apply text-4xl font-bold;
+        }
+
+        .metric-label {
+            @apply text-sm text-gray-500 mt-1;
+        }
+    </style>
 </head>
 <body class="bg-gray-100 min-h-screen">
 
-  <div class="max-w-5xl mx-auto px-4 py-8">
+<div class="max-w-5xl mx-auto px-4 py-8">
 
     <!-- Header -->
     <header class="mb-8 flex items-center justify-between">
-      <div>
-        <h1 class="text-3xl font-extrabold text-gray-800">BME688 Logger</h1>
-        <p class="text-gray-500 text-sm mt-1">
-          Last update: <span id="lastRead" class="font-medium">
+        <div>
+            <h1 class="text-3xl font-extrabold text-gray-800">BME688 Logger</h1>
+            <p class="text-gray-500 text-sm mt-1">
+                Last update: <span id="lastRead" class="font-medium">
             {{ data.get('timestamp', 'No data yet') }}
           </span>
-        </p>
-      </div>
-      <div class="flex gap-3">
-        <!-- Download today's CSV -->
-        <a href="/download" class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition">Download CSV
-        </a>
-      </div>
-      <div class="flex gap-3">
-        <!-- Toggle display -->
-        <button id="displayToggle"
-                class="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg border-2 transition"
-                onclick="toggleDisplay()">
-          &#x25A1; Display
-        </button>
-      </div>
+            </p>
+        </div>
+        <div class="flex gap-3">
+            <!-- Download today's CSV -->
+            <a href="/download"
+               class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-4 py-2 rounded-lg transition">Download
+                CSV
+            </a>
+        </div>
+        <div class="flex gap-3">
+            <!-- Toggle display -->
+            <button id="displayToggle"
+                    class="inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg border-2 transition"
+                    onclick="toggleDisplay()">
+                &#x25A1; Display
+            </button>
+        </div>
     </header>
 
     <!-- Current readings -->
     <section class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-8">
-      <div class="card text-center">
-        <div class="metric-value text-red-500" id="temperature">
-          {{ "%.1f"|format(data.get('temperature', 0)) if data else '–' }}
+        <div class="card text-center">
+            <div class="metric-value text-red-500" id="temperature">
+                {{ "%.1f"|format(data.get('temperature', 0)) if data else '–' }}
+            </div>
+            <div class="metric-label">Temperature (°C)</div>
         </div>
-        <div class="metric-label">Temperature (°C)</div>
-      </div>
-      <div class="card text-center">
-        <div class="metric-value text-blue-500" id="humidity">
-          {{ "%.1f"|format(data.get('humidity', 0)) if data else '–' }}
+        <div class="card text-center">
+            <div class="metric-value text-blue-500" id="humidity">
+                {{ "%.1f"|format(data.get('humidity', 0)) if data else '–' }}
+            </div>
+            <div class="metric-label">Humidity (%)</div>
         </div>
-        <div class="metric-label">Humidity (%)</div>
-      </div>
-      <div class="card text-center">
-        <div class="metric-value text-green-600" id="pressure">
-          {{ "%.1f"|format(data.get('pressure', 0)) if data else '–' }}
+        <div class="card text-center">
+            <div class="metric-value text-green-600" id="pressure">
+                {{ "%.1f"|format(data.get('pressure', 0)) if data else '–' }}
+            </div>
+            <div class="metric-label">Pressure (hPa)</div>
         </div>
-        <div class="metric-label">Pressure (hPa)</div>
-      </div>
-      <div class="card text-center">
-        <div class="metric-value text-purple-600" id="gas">
-          {{ data.get('gas_resistance') | int if data.get('gas_resistance') else '–' }}
+        <div class="card text-center">
+            <div class="metric-value text-purple-600" id="gas">
+                {{ data.get('gas_resistance') | int if data.get('gas_resistance') else '–' }}
+            </div>
+            <div class="metric-label">Gas resistance (Ω)</div>
         </div>
-        <div class="metric-label">Gas resistance (Ω)</div>
-      </div>
-      <div class="card text-center">
-        <div class="metric-value text-orange-500" id="iaq">
-          {{ data.get('iaq') if data.get('iaq') is not none else '–' }}
+        <div class="card text-center">
+            <div class="metric-value text-orange-500" id="iaq">
+                {{ data.get('iaq') if data.get('iaq') is not none else '–' }}
+            </div>
+            <div class="metric-label">IAQ <span id="iaqLabel" class="block text-xs text-gray-400"></span></div>
         </div>
-        <div class="metric-label">IAQ <span id="iaqLabel" class="block text-xs text-gray-400"></span></div>
-      </div>
     </section>
 
     <!-- Charts -->
     <section class="grid grid-cols-1 gap-6 mb-8">
-      <div class="card">
-        <h2 class="font-semibold text-gray-700 mb-3">Temperature (°C) – last 7 days</h2>
-        <canvas id="chartTemp" height="80"></canvas>
-      </div>
-      <div class="card">
-        <h2 class="font-semibold text-gray-700 mb-3">Humidity (%) – last 7 days</h2>
-        <canvas id="chartHum" height="80"></canvas>
-      </div>
-      <div class="card">
-        <h2 class="font-semibold text-gray-700 mb-3">Pressure (hPa) – last 7 days</h2>
-        <canvas id="chartPress" height="80"></canvas>
-      </div>
-      <div class="card">
-        <h2 class="font-semibold text-gray-700 mb-3">IAQ – last 7 days <span class="text-xs font-normal text-gray-400">(lower is better)</span></h2>
-        <canvas id="chartIaq" height="80"></canvas>
-      </div>
+        <div class="card">
+            <h2 class="font-semibold text-gray-700 mb-3">Temperature (°C) – last 7 days</h2>
+            <canvas id="chartTemp" height="80"></canvas>
+        </div>
+        <div class="card">
+            <h2 class="font-semibold text-gray-700 mb-3">Humidity (%) – last 7 days</h2>
+            <canvas id="chartHum" height="80"></canvas>
+        </div>
+        <div class="card">
+            <h2 class="font-semibold text-gray-700 mb-3">Pressure (hPa) – last 7 days</h2>
+            <canvas id="chartPress" height="80"></canvas>
+        </div>
+        <div class="card">
+            <h2 class="font-semibold text-gray-700 mb-3">IAQ – last 7 days <span
+                    class="text-xs font-normal text-gray-400">(lower is better)</span></h2>
+            <canvas id="chartIaq" height="80"></canvas>
+        </div>
     </section>
 
-  </div><!-- /max-w-5xl -->
+</div><!-- /max-w-5xl -->
 
-  <script>
+<script>
     // ── Helpers ────────────────────────────────────────────────────────────
     const qs = (sel) => document.querySelector(sel);
     const fmtNum = (v, dec = 1) => v != null ? parseFloat(v).toFixed(dec) : '–';
 
     // ── Display toggle ─────────────────────────────────────────────────────
-    let displayEnabled = {{ 'true' if display_enabled else 'false' }};
+    let displayEnabled = {
+    {
+        'true'
+        if display_enabled else
+        'false'
+    }
+    }
+    ;
 
     function applyDisplayStyle() {
-      const btn = qs('#displayToggle');
-      if (displayEnabled) {
-        btn.classList.remove('border-gray-300', 'text-gray-500');
-        btn.classList.add('border-green-500', 'text-green-600', 'bg-green-50');
-        btn.textContent = '▣ Display ON';
-      } else {
-        btn.classList.remove('border-green-500', 'text-green-600', 'bg-green-50');
-        btn.classList.add('border-gray-300', 'text-gray-500');
-        btn.textContent = '□ Display OFF';
-      }
+        const btn = qs('#displayToggle');
+        if (displayEnabled) {
+            btn.classList.remove('border-gray-300', 'text-gray-500');
+            btn.classList.add('border-green-500', 'text-green-600', 'bg-green-50');
+            btn.textContent = '▣ Display ON';
+        } else {
+            btn.classList.remove('border-green-500', 'text-green-600', 'bg-green-50');
+            btn.classList.add('border-gray-300', 'text-gray-500');
+            btn.textContent = '□ Display OFF';
+        }
     }
 
     async function toggleDisplay() {
-      displayEnabled = !displayEnabled;
-      await fetch('/api/display', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enabled: displayEnabled }),
-      });
-      applyDisplayStyle();
+        displayEnabled = !displayEnabled;
+        await fetch('/api/display', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({enabled: displayEnabled}),
+        });
+        applyDisplayStyle();
     }
 
     applyDisplayStyle();
 
     // ── Live current readings (refresh every 30 s) ─────────────────────────
     const IAQ_LABELS = [
-      [50,  'Good'],
-      [100, 'Moderate'],
-      [150, 'Unhealthy (sensitive)'],
-      [200, 'Unhealthy'],
-      [300, 'Very unhealthy'],
-      [Infinity, 'Hazardous'],
+        [50, 'Good'],
+        [100, 'Moderate'],
+        [150, 'Unhealthy (sensitive)'],
+        [200, 'Unhealthy'],
+        [300, 'Very unhealthy'],
+        [Infinity, 'Hazardous'],
     ];
 
     function iaqLabel(v) {
-      if (v == null) return 'Warming up';
-      for (const [limit, label] of IAQ_LABELS) {
-        if (v <= limit) return label;
-      }
-      return 'Hazardous';
+        if (v == null) return 'Warming up';
+        for (const [limit, label] of IAQ_LABELS) {
+            if (v <= limit) return label;
+        }
+        return 'Hazardous';
     }
 
     async function refreshCurrent() {
-      try {
-        const res = await fetch('/api/current');
-        const d = await res.json();
-        if (!d || !d.timestamp) return;
-        qs('#temperature').textContent = fmtNum(d.temperature);
-        qs('#humidity').textContent    = fmtNum(d.humidity);
-        qs('#pressure').textContent    = fmtNum(d.pressure);
-        qs('#gas').textContent         = d.gas_resistance ? Math.round(d.gas_resistance) : '–';
-        qs('#iaq').textContent         = d.iaq != null ? d.iaq : '–';
-        qs('#iaqLabel').textContent    = iaqLabel(d.iaq);
-        qs('#lastRead').textContent    = d.timestamp;
-      } catch (e) { /* ignore */ }
+        try {
+            const res = await fetch('/api/current');
+            const d = await res.json();
+            if (!d || !d.timestamp) return;
+            qs('#temperature').textContent = fmtNum(d.temperature);
+            qs('#humidity').textContent = fmtNum(d.humidity);
+            qs('#pressure').textContent = fmtNum(d.pressure);
+            qs('#gas').textContent = d.gas_resistance ? Math.round(d.gas_resistance) : '–';
+            qs('#iaq').textContent = d.iaq != null ? d.iaq : '–';
+            qs('#iaqLabel').textContent = iaqLabel(d.iaq);
+            qs('#lastRead').textContent = d.timestamp;
+        } catch (e) { /* ignore */
+        }
     }
+
     setInterval(refreshCurrent, 30_000);
 
     // ── Chart helpers ──────────────────────────────────────────────────────
     function makeChart(id, label, color, data, labels) {
-      return new Chart(qs('#' + id), {
-        type: 'line',
-        data: {
-          labels,
-          datasets: [{
-            label,
-            data,
-            borderColor: color,
-            backgroundColor: color + '22',
-            borderWidth: 2,
-            pointRadius: 0,
-            tension: 0.3,
-            fill: true,
-          }],
-        },
-        options: {
-          responsive: true,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: {
-              ticks: { maxTicksLimit: 10, maxRotation: 30 },
-              grid: { display: false },
+        return new Chart(qs('#' + id), {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [{
+                    label,
+                    data,
+                    borderColor: color,
+                    backgroundColor: color + '22',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.3,
+                    fill: true,
+                }],
             },
-            y: { grid: { color: '#f0f0f0' } },
-          },
-        },
-      });
+            options: {
+                responsive: true,
+                plugins: {legend: {display: false}},
+                scales: {
+                    x: {
+                        ticks: {maxTicksLimit: 10, maxRotation: 30},
+                        grid: {display: false},
+                    },
+                    y: {grid: {color: '#f0f0f0'}},
+                },
+            },
+        });
     }
 
     // ── Load history and build charts ──────────────────────────────────────
     async function loadHistory() {
-      try {
-        const res = await fetch('/api/history?days=7');
-        const rows = await res.json();
-        if (!rows.length) return;
+        try {
+            const res = await fetch('/api/history?days=7');
+            const rows = await res.json();
+            if (!rows.length) return;
 
-        const labels = rows.map(r => r.timestamp);
-        makeChart('chartTemp',  'Temperature °C',  '#ef4444', rows.map(r => r.temperature),  labels);
-        makeChart('chartHum',   'Humidity %',       '#3b82f6', rows.map(r => r.humidity),     labels);
-        makeChart('chartPress', 'Pressure hPa',     '#16a34a', rows.map(r => r.pressure),     labels);
-        makeChart('chartIaq',   'IAQ',              '#f97316', rows.map(r => r.iaq != null ? r.iaq : null), labels);
-      } catch (e) { console.error('History load failed', e); }
+            const labels = rows.map(r => r.timestamp);
+            makeChart('chartTemp', 'Temperature °C', '#ef4444', rows.map(r => r.temperature), labels);
+            makeChart('chartHum', 'Humidity %', '#3b82f6', rows.map(r => r.humidity), labels);
+            makeChart('chartPress', 'Pressure hPa', '#16a34a', rows.map(r => r.pressure), labels);
+            makeChart('chartIaq', 'IAQ', '#f97316', rows.map(r => r.iaq != null ? r.iaq : null), labels);
+        } catch (e) {
+            console.error('History load failed', e);
+        }
     }
 
     loadHistory();
-  </script>
+</script>
 </body>
 </html>
