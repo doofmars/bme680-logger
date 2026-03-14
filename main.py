@@ -35,6 +35,7 @@ DAYLIGHT_START = _cfg.getint("display", "daylight_start", fallback=8)
 DAYLIGHT_END = _cfg.getint("display", "daylight_end", fallback=22)
 WEB_HOST = _cfg.get("web", "host", fallback="0.0.0.0")
 WEB_PORT = _cfg.getint("web", "port", fallback=8080)
+FONT_SIZE = 15
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -75,10 +76,10 @@ except Exception as _e:
 try:
     from luma.core.interface.serial import i2c as _luma_i2c
     from luma.core.render import canvas as _luma_canvas
-    from luma.oled.device import ssd1306 as _ssd1306
+    from luma.oled.device import ssd1316 as _ssd1316
 
     _serial = _luma_i2c(port=0, address=0x3C)
-    _display = _ssd1306(_serial)
+    _display = _ssd1316(_serial)
     DISPLAY_OK = True
     log.info("OLED display initialised")
 except Exception as _e:
@@ -93,7 +94,7 @@ try:
 
     try:
         _OLED_FONT = _ImageFont.truetype(
-            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 12
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", FONT_SIZE
         )
     except Exception:
         _OLED_FONT = _ImageFont.load_default()
@@ -173,12 +174,8 @@ def _refresh_display(data: dict) -> None:
         _display.show()
         font = _OLED_FONT  # may be None if PIL unavailable
         with _luma_canvas(_display) as draw:
-            draw.text((0, 0),  f"Temp:  {data['temperature']:.1f} \u00b0C", fill="white", font=font)
-            draw.text((0, 14), f"Hum:   {data['humidity']:.1f} %",          fill="white", font=font)
-            draw.text((0, 28), f"Press: {data['pressure']:.1f} hPa",        fill="white", font=font)
-            gas = data.get("gas_resistance")
-            if gas is not None:
-                draw.text((0, 42), f"Gas:   {int(gas)} \u03a9",             fill="white", font=font)
+            draw.text((0, 0), f"Temp: {data['temperature']:.1f} \u00b0C {datetime.now().isoformat()[11:13]}",       fill="white", font=font)
+            draw.text((0, FONT_SIZE), f"Hum: {data['humidity']:.1f} %  {datetime.now().isoformat()[14:16]}",       fill="white", font=font)
 
 
 # ---------------------------------------------------------------------------
