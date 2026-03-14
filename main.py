@@ -174,8 +174,8 @@ def _refresh_display(data: dict) -> None:
         _display.show()
         font = _OLED_FONT  # may be None if PIL unavailable
         with _luma_canvas(_display) as draw:
-            draw.text((0, 0),  f"Temp: {data['temperature']:.1f} \u00b0C",       fill="white", font=font)
-            draw.text((0, FONT_SIZE), f"Hum:  {data['humidity']:.1f} %",       fill="white", font=font)
+            draw.text((0, 0), f"Temp: {data['temperature']:.1f} \u00b0C {datetime.now().isoformat()[11:13]}",       fill="white", font=font)
+            draw.text((0, FONT_SIZE), f"Hum: {data['humidity']:.1f} %  {datetime.now().isoformat()[14:16]}",       fill="white", font=font)
 
 
 # ---------------------------------------------------------------------------
