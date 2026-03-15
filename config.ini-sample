@@ -1,7 +1,9 @@
 [logging]
 # Directory where daily CSV log files are stored
 log_dir = logs
-# Sensor reading and logging interval in seconds (300 = 5 minutes)
+# How often the sensor is read and the display is refreshed (seconds)
+read_interval_seconds = 5
+# How often a reading is written to the CSV log file (seconds)
 interval_seconds = 300
 
 [display]

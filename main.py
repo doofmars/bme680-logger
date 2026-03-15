@@ -2,8 +2,10 @@
 """
 BME688 Logger Service
 ---------------------
-* Reads a BME688 sensor every ``interval_seconds`` (default 5 min).
-* Appends readings (including IAQ) to a daily CSV file (F1, F4).
+* Reads a BME688 sensor every ``read_interval_seconds`` (default 5 s) and
+  refreshes the OLED display with the latest values.
+* Appends readings (including IAQ) to a daily CSV file every
+  ``interval_seconds`` (default 5 min) (F1, F4).
 * Serves a Flask web-UI that shows current values, a history chart and
   a raw-data download link (F2, F3).
 * Drives a luma.oled OLED display with configurable view modes including
@@ -17,7 +19,7 @@ import threading
 import time
 
 from src import sensor, display, csv_logger
-from src.config import LOG_DIR, LOG_INTERVAL, WEB_HOST, WEB_PORT
+from src.config import LOG_DIR, READ_INTERVAL, LOG_INTERVAL, WEB_HOST, WEB_PORT
 from src.web import app
 
 # ---------------------------------------------------------------------------
@@ -56,16 +58,22 @@ def _sensor_loop():
     # Collect gas burn-in data for IAQ calibration (~50 s, runs in background)
     sensor.collect_burn_in()
 
-    # Subsequent reads at the configured interval
+    # Read the sensor every READ_INTERVAL seconds; write to CSV every LOG_INTERVAL seconds
+    last_log_time = time.monotonic()
     while True:
-        time.sleep(LOG_INTERVAL)
+        time.sleep(READ_INTERVAL)
         try:
             data = sensor.read_sensor()
             if data:
                 sensor.set_latest(data)
-                csv_logger.append_row(LOG_DIR, data)
                 display.refresh_display(data)
-                log.info("Logged: %s", data)
+                now = time.monotonic()
+                if now - last_log_time >= LOG_INTERVAL:
+                    csv_logger.append_row(LOG_DIR, data)
+                    log.info("Logged: %s", data)
+                    last_log_time = now
+                else:
+                    log.debug("Read: %s", data)
             else:
                 log.debug("No sensor data available")
         except Exception as exc:

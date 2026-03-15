@@ -67,6 +67,9 @@ sudo cp bme680-logger.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable bme680-logger
 sudo systemctl start bme680-logger
+
+# 4. Copy/rename the sample config
+cp config.ini-sample config.ini
 ```
 
 ## Configuration
