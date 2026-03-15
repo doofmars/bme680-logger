@@ -3,7 +3,7 @@ import configparser
 import os
 
 _cfg = configparser.ConfigParser()
-_cfg.read(os.path.join(os.path.dirname(__file__), "config.ini"))
+_cfg.read(os.path.join(os.path.dirname(__file__), "..", "config.ini"))
 
 LOG_DIR = _cfg.get("logging", "log_dir", fallback="logs")
 READ_INTERVAL = _cfg.getint("logging", "read_interval_seconds", fallback=5)
