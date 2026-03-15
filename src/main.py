@@ -18,9 +18,9 @@ import os
 import threading
 import time
 
-from src import sensor, display, csv_logger
-from src.config import LOG_DIR, READ_INTERVAL, LOG_INTERVAL, WEB_HOST, WEB_PORT
-from src.web import app
+import sensor, display, csv_logger
+from config import LOG_DIR, READ_INTERVAL, LOG_INTERVAL, WEB_HOST, WEB_PORT
+from web import app
 
 # ---------------------------------------------------------------------------
 # Logging
