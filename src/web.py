@@ -49,7 +49,7 @@ def api_history():
 @app.route("/download")
 def download():
     """Serve today's CSV file as a download."""
-    path = log_path(LOG_DIR)
+    path = os.path.abspath(log_path(LOG_DIR))
     if not os.path.exists(path):
         abort(404, description="No data logged yet for today.")
     return send_file(path, as_attachment=True, download_name=os.path.basename(path))

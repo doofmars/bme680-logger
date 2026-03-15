@@ -116,14 +116,7 @@
     const fmtNum = (v, dec = 1) => v != null ? parseFloat(v).toFixed(dec) : '–';
 
     // ── Display toggle ─────────────────────────────────────────────────────
-    let displayEnabled = {
-    {
-        'true'
-        if display_enabled else
-        'false'
-    }
-    }
-    ;
+    let displayEnabled = {{ 'true' if display_enabled else 'false' }};
 
     function applyDisplayStyle() {
         const btn = qs('#displayToggle');
